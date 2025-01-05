@@ -29,11 +29,11 @@ function createItemElement(item) {
     div.className = 'relative flex flex-col items-center p-4 bg-[#1a1a1a] rounded-lg cursor-pointer hover:bg-[#252525] transition-colors';
     
     div.innerHTML = `
-        <div class="text-4xl mb-2">${item.image}</div>
+        <img src="${item.image}" alt="${item.name}" class="w-24 h-24 object-contain mb-2">
         <h3 class="font-bold">${item.name}</h3>
         <p class="text-sm text-gray-400">Stock: ${item.stock}/${item.max_stock}</p>
         <button onclick="buyItem('${item.name}')" class="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
-            $${item.price}
+            ${Config.Currency.position === 'left' ? Config.Currency.symbol : ''}${item.price}${Config.Currency.position === 'right' ? Config.Currency.symbol : ''}
         </button>
     `;
 

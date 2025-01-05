@@ -1,6 +1,44 @@
-/* ... keep existing code */
+/* Base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
 
-/* Agregar estilos específicos para el trabajo */
+body {
+    background: none;
+}
+
+.container {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 1200px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 1rem;
+    padding: 2rem;
+    color: white;
+}
+
+.shop-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Employee section styles */
 .employee-section {
     background: rgba(0, 0, 0, 0.5);
     padding: 1rem;
@@ -41,4 +79,16 @@
     border-radius: 9999px;
     font-size: 0.75rem;
     margin-right: 0.5rem;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 1rem;
+    }
+
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
 }

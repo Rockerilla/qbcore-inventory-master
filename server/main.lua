@@ -14,6 +14,11 @@ local function HasPermission(source, permission)
     return grade.permissions[permission]
 end
 
+local function GetLocalizedText(key)
+    local lang = 'en' -- Puedes hacer esto configurable
+    return Config.Language[lang][key] or key
+end
+
 -- Eventos del servidor
 RegisterNetEvent('qb-shops:server:buyItem', function(shopId, itemName, amount)
     local src = source
@@ -27,13 +32,13 @@ RegisterNetEvent('qb-shops:server:buyItem', function(shopId, itemName, amount)
     if not item then return end
 
     if item.stock < amount then
-        TriggerClientEvent('QBCore:Notify', src, 'No hay suficiente stock', 'error')
+        TriggerClientEvent('QBCore:Notify', src, GetLocalizedText('no_stock'), 'error')
         return
     end
 
     local totalPrice = item.price * amount
     if Player.PlayerData.money.cash < totalPrice then
-        TriggerClientEvent('QBCore:Notify', src, 'No tienes suficiente dinero', 'error')
+        TriggerClientEvent('QBCore:Notify', src, GetLocalizedText('no_money'), 'error')
         return
     end
 
@@ -46,13 +51,13 @@ RegisterNetEvent('qb-shops:server:buyItem', function(shopId, itemName, amount)
     Player.Functions.RemoveMoney('cash', totalPrice)
     Config.Shops[shopId].inventory[itemName].stock = Config.Shops[shopId].inventory[itemName].stock - amount
 
-    TriggerClientEvent('QBCore:Notify', src, 'Compra realizada con éxito', 'success')
+    TriggerClientEvent('QBCore:Notify', src, GetLocalizedText('purchase_success'), 'success')
 end)
 
 -- Comandos del servidor
 QBCore.Commands.Add('addstock', Config.Commands['addstock'].help, {{name = 'item', help = 'Nombre del item'}, {name = 'amount', help = 'Cantidad'}}, true, function(source, args)
     if not HasPermission(source, 'add_stock') then
-        TriggerClientEvent('QBCore:Notify', source, 'No tienes permiso', 'error')
+        TriggerClientEvent('QBCore:Notify', source, GetLocalizedText('no_permission'), 'error')
         return
     end
 
@@ -60,7 +65,7 @@ QBCore.Commands.Add('addstock', Config.Commands['addstock'].help, {{name = 'item
     local amount = tonumber(args[2])
     
     if not amount or amount <= 0 then
-        TriggerClientEvent('QBCore:Notify', source, 'Cantidad inválida', 'error')
+        TriggerClientEvent('QBCore:Notify', source, GetLocalizedText('invalid_amount'), 'error')
         return
     end
 
@@ -69,15 +74,15 @@ QBCore.Commands.Add('addstock', Config.Commands['addstock'].help, {{name = 'item
             local newStock = shop.inventory[itemName].stock + amount
             if newStock <= shop.inventory[itemName].max_stock then
                 shop.inventory[itemName].stock = newStock
-                TriggerClientEvent('QBCore:Notify', source, 'Stock actualizado', 'success')
+                TriggerClientEvent('QBCore:Notify', source, GetLocalizedText('stock_added'), 'success')
             else
-                TriggerClientEvent('QBCore:Notify', source, 'Excede el stock máximo', 'error')
+                TriggerClientEvent('QBCore:Notify', source, GetLocalizedText('max_stock_reached'), 'error')
             end
             return
         end
     end
 
-    TriggerClientEvent('QBCore:Notify', source, 'Item no encontrado', 'error')
+    TriggerClientEvent('QBCore:Notify', source, GetLocalizedText('item_not_found'), 'error')
 end)
 
 -- Inicialización del servidor

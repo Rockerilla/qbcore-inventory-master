@@ -1,6 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local currentShop = nil
 local isLoggedIn = false
+local shopPeds = {}
 
 -- Funciones de utilidad
 local function ShowNotification(msg, type)
@@ -12,6 +13,24 @@ local function ShowNotification(msg, type)
         })
     else
         QBCore.Functions.Notify(msg, type)
+    end
+end
+
+-- Inicialización de NPCs
+local function SpawnShopPeds()
+    for k, v in pairs(Config.Shops) do
+        local model = GetHashKey(v.ped.model)
+        RequestModel(model)
+        while not HasModelLoaded(model) do
+            Wait(1)
+        end
+        
+        local ped = CreatePed(4, model, v.ped.coords.x, v.ped.coords.y, v.ped.coords.z - 1.0, v.ped.coords.w, false, true)
+        SetEntityHeading(ped, v.ped.coords.w)
+        FreezeEntityPosition(ped, true)
+        SetEntityInvincible(ped, true)
+        SetBlockingOfNonTemporaryEvents(ped, true)
+        shopPeds[k] = ped
     end
 end
 
@@ -82,11 +101,16 @@ end)
 -- Eventos del cliente
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     isLoggedIn = true
+    SpawnShopPeds()
     InitializeTargets()
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
     isLoggedIn = false
+    for _, ped in pairs(shopPeds) do
+        DeletePed(ped)
+    end
+    shopPeds = {}
 end)
 
 -- Comandos
@@ -98,6 +122,7 @@ end)
 -- Inicialización
 CreateThread(function()
     if isLoggedIn then
+        SpawnShopPeds()
         InitializeTargets()
     end
 end)
