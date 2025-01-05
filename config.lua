@@ -5,6 +5,8 @@ Config.UseOxInventory = true -- false para usar qb-inventory
 Config.UseOxTarget = true -- false para usar qb-target
 Config.UseOxLib = true -- false para usar qb-notify
 
+Config.ImagePath = "nui://core_inventory/html/img/"
+
 Config.Currency = {
     symbol = "$",
     position = "left" -- 'left' o 'right'
@@ -37,25 +39,33 @@ Config.Shops = {
     ['247_1'] = {
         label = "24/7 Shop",
         coords = vector4(25.7, -1347.3, 29.49, 271.32),
+        blip = {
+            sprite = 59,
+            color = 25,
+            scale = 0.7,
+            display = 4,
+            shortRange = true,
+        },
         ped = {
             model = "mp_m_shopkeep_01",
-            coords = vector4(24.5, -1347.3, 28.49, 271.32)
+            coords = vector4(24.5, -1347.3, 28.49, 271.32),
+            scenario = "WORLD_HUMAN_STAND_IMPATIENT"
         },
-        job = "247", -- Trabajo requerido para gestionar
+        job = "247",
         inventory = {
             ["water"] = {
                 name = "water",
                 price = 10,
                 stock = 100,
                 max_stock = 200,
-                image = "nui://core_inventory/html/img/water.png"
+                image = Config.ImagePath .. "water.png"
             },
             ["sandwich"] = {
                 name = "sandwich",
                 price = 15,
                 stock = 100,
                 max_stock = 200,
-                image = "nui://core_inventory/html/img/sandwich.png"
+                image = Config.ImagePath .. "sandwich.png"
             },
         }
     },

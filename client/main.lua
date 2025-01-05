@@ -2,6 +2,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local currentShop = nil
 local isLoggedIn = false
 local shopPeds = {}
+local shopBlips = {}
 
 -- Funciones de utilidad
 local function ShowNotification(msg, type)
@@ -16,6 +17,20 @@ local function ShowNotification(msg, type)
     end
 end
 
+-- Inicialización de Blips
+local function CreateBlip(coords, sprite, color, text, scale, display, shortRange)
+    local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
+    SetBlipSprite(blip, sprite)
+    SetBlipDisplay(blip, display)
+    SetBlipScale(blip, scale)
+    SetBlipColour(blip, color)
+    SetBlipAsShortRange(blip, shortRange)
+    BeginTextCommandSetBlipName("STRING")
+    AddTextComponentString(text)
+    EndTextCommandSetBlipName(blip)
+    return blip
+end
+
 -- Inicialización de NPCs
 local function SpawnShopPeds()
     for k, v in pairs(Config.Shops) do
@@ -25,12 +40,26 @@ local function SpawnShopPeds()
             Wait(1)
         end
         
+        if shopPeds[k] then
+            DeletePed(shopPeds[k])
+        end
+        
         local ped = CreatePed(4, model, v.ped.coords.x, v.ped.coords.y, v.ped.coords.z - 1.0, v.ped.coords.w, false, true)
         SetEntityHeading(ped, v.ped.coords.w)
         FreezeEntityPosition(ped, true)
         SetEntityInvincible(ped, true)
         SetBlockingOfNonTemporaryEvents(ped, true)
+        
+        if v.ped.scenario then
+            TaskStartScenarioInPlace(ped, v.ped.scenario, 0, true)
+        end
+        
         shopPeds[k] = ped
+        
+        -- Create blip for shop
+        if v.blip then
+            shopBlips[k] = CreateBlip(v.coords, v.blip.sprite, v.blip.color, v.label, v.blip.scale, v.blip.display, v.blip.shortRange)
+        end
     end
 end
 
@@ -47,7 +76,7 @@ local function InitializeTargets()
                     {
                         name = 'shop_' .. k,
                         icon = 'fas fa-shop',
-                        label = 'Abrir Tienda',
+                        label = v.label,
                         onSelect = function()
                             currentShop = k
                             SetNuiFocus(true, true)
@@ -69,7 +98,7 @@ local function InitializeTargets()
                     {
                         type = "client",
                         icon = 'fas fa-shop',
-                        label = 'Abrir Tienda',
+                        label = v.label,
                         action = function()
                             currentShop = k
                             SetNuiFocus(true, true)
@@ -83,6 +112,23 @@ local function InitializeTargets()
             })
         end
     end
+end
+
+-- Cleanup function
+local function CleanupResources()
+    for k, ped in pairs(shopPeds) do
+        if DoesEntityExist(ped) then
+            DeletePed(ped)
+        end
+    end
+    shopPeds = {}
+    
+    for k, blip in pairs(shopBlips) do
+        if DoesBlipExist(blip) then
+            RemoveBlip(blip)
+        end
+    end
+    shopBlips = {}
 end
 
 -- Eventos NUI
@@ -107,10 +153,7 @@ end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
     isLoggedIn = false
-    for _, ped in pairs(shopPeds) do
-        DeletePed(ped)
-    end
-    shopPeds = {}
+    CleanupResources()
 end)
 
 -- Comandos
@@ -124,5 +167,12 @@ CreateThread(function()
     if isLoggedIn then
         SpawnShopPeds()
         InitializeTargets()
+    end
+end)
+
+-- Cleanup on resource stop
+AddEventHandler('onResourceStop', function(resourceName)
+    if GetCurrentResourceName() == resourceName then
+        CleanupResources()
     end
 end)
